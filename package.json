@@ -1,0 +1,207 @@
+{
+  "name": "arborist",
+  "displayName": "Arborist",
+  "description": "Git worktree management for VS Code",
+  "version": "0.1.0",
+  "publisher": "arborist",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "SCM Providers",
+    "Other"
+  ],
+  "keywords": [
+    "git",
+    "worktree",
+    "branch",
+    "workspace"
+  ],
+  "activationEvents": [
+    "workspaceContains:.git"
+  ],
+  "main": "./out/extension.js",
+  "icon": "resources/icons/arborist.png",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "arborist",
+          "title": "Arborist",
+          "icon": "resources/icons/arborist.svg"
+        }
+      ]
+    },
+    "views": {
+      "arborist": [
+        {
+          "id": "arborist.worktreeExplorer",
+          "name": "Worktrees",
+          "icon": "resources/icons/arborist.svg"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "arborist.createWorktree",
+        "title": "Arborist: New Worktree",
+        "icon": "$(add)"
+      },
+      {
+        "command": "arborist.removeWorktree",
+        "title": "Arborist: Remove Worktree",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "arborist.switchWorktree",
+        "title": "Arborist: Switch Worktree"
+      },
+      {
+        "command": "arborist.openWorktree",
+        "title": "Arborist: Open Worktree in New Window",
+        "icon": "$(link-external)"
+      },
+      {
+        "command": "arborist.refreshWorktrees",
+        "title": "Arborist: Refresh Worktrees",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "arborist.setWorktreeColor",
+        "title": "Arborist: Set Worktree Color",
+        "icon": "$(symbol-color)"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "arborist.createWorktree",
+          "when": "view == arborist.worktreeExplorer",
+          "group": "navigation"
+        },
+        {
+          "command": "arborist.refreshWorktrees",
+          "when": "view == arborist.worktreeExplorer",
+          "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "arborist.openWorktree",
+          "when": "view == arborist.worktreeExplorer && viewItem == worktree",
+          "group": "inline"
+        },
+        {
+          "command": "arborist.openWorktree",
+          "when": "view == arborist.worktreeExplorer && viewItem == worktreeMain",
+          "group": "inline"
+        },
+        {
+          "command": "arborist.removeWorktree",
+          "when": "view == arborist.worktreeExplorer && viewItem == worktree",
+          "group": "1_modification"
+        },
+        {
+          "command": "arborist.setWorktreeColor",
+          "when": "view == arborist.worktreeExplorer && viewItem == worktree",
+          "group": "1_modification"
+        },
+        {
+          "command": "arborist.setWorktreeColor",
+          "when": "view == arborist.worktreeExplorer && viewItem == worktreeMain",
+          "group": "1_modification"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "arborist.refreshWorktrees",
+          "when": "false"
+        },
+        {
+          "command": "arborist.openWorktree",
+          "when": "false"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Arborist",
+      "properties": {
+        "arborist.worktreeLocation": {
+          "type": "string",
+          "default": "sibling",
+          "enum": [
+            "sibling"
+          ],
+          "description": "Where to create worktree directories (currently only sibling supported)"
+        },
+        "arborist.autoOpenNewWindow": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically open new worktrees in a new VS Code window"
+        },
+        "arborist.postCreateCommands": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "Shell commands to run after creating a worktree"
+        },
+        "arborist.namingPattern": {
+          "type": "string",
+          "default": "{repo}-{branch}",
+          "description": "Naming pattern for worktree directories. {repo} and {branch} are replaced."
+        },
+        "arborist.filesToCopy": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "Files/folders to copy from main worktree into new worktrees (e.g. .env, node_modules)"
+        },
+        "arborist.mainWorktreeColor": {
+          "type": "string",
+          "default": "#2ea043",
+          "description": "Color for the main/primary worktree window"
+        },
+        "arborist.colorPalette": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "#1f6feb",
+            "#a371f7",
+            "#f0883e",
+            "#f85149",
+            "#3fb950",
+            "#58a6ff",
+            "#d2a8ff",
+            "#e3b341"
+          ],
+          "description": "Palette of colors auto-assigned to new worktrees"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js",
+    "pretest": "npm run compile"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.6",
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.85.0",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "@vscode/test-electron": "^2.3.8",
+    "eslint": "^8.56.0",
+    "mocha": "^10.3.0",
+    "typescript": "^5.3.0"
+  }
+}

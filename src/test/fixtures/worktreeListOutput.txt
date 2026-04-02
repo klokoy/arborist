@@ -1,0 +1,12 @@
+worktree /Users/dev/projects/my-app
+HEAD abc123def456789012345678901234567890abcd
+branch refs/heads/main
+
+worktree /Users/dev/projects/my-app-feature-login
+HEAD def456abc789012345678901234567890abcd1234
+branch refs/heads/feature-login
+
+worktree /Users/dev/projects/my-app-fix-header
+HEAD 789012345678901234567890abcd1234def456ab
+branch refs/heads/fix/header-bug
+
