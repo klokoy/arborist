@@ -15,14 +15,14 @@ export async function activate(
   context: vscode.ExtensionContext,
 ): Promise<void> {
   // Determine the main worktree path
-  let mainWorktreePath: string;
-  try {
-    const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
-    if (!workspaceRoot) return;
-    mainWorktreePath = await getMainWorktreePath(workspaceRoot);
-  } catch {
-    // Not a git repo or git not available — don't activate
-    return;
+  const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+  let mainWorktreePath: string | undefined;
+  if (workspaceRoot) {
+    try {
+      mainWorktreePath = await getMainWorktreePath(workspaceRoot);
+    } catch {
+      // Not a git repo or git not available
+    }
   }
 
   const colorManager = new ColorManager(context.globalState);
@@ -34,10 +34,27 @@ export async function activate(
     showCollapseAll: false,
   });
 
+  context.subscriptions.push(treeView, statusBar);
+
+  // If no git repo found, register noop commands and stop
+  if (!mainWorktreePath) {
+    context.subscriptions.push(
+      vscode.commands.registerCommand(COMMANDS.CREATE, () => {}),
+      vscode.commands.registerCommand(COMMANDS.REMOVE, () => {}),
+      vscode.commands.registerCommand(COMMANDS.SWITCH, () => {}),
+      vscode.commands.registerCommand(COMMANDS.OPEN, () => {}),
+      vscode.commands.registerCommand(COMMANDS.REFRESH, () => {}),
+      vscode.commands.registerCommand(COMMANDS.SET_COLOR, () => {}),
+    );
+    return;
+  }
+
+  const mainPath = mainWorktreePath;
+
   // Initial status bar update
   async function refreshStatusBar() {
     try {
-      const worktrees = await listWorktrees(mainWorktreePath);
+      const worktrees = await listWorktrees(mainPath);
       statusBar.update(worktrees);
     } catch {
       // Silently fail — status bar just won't update
@@ -48,19 +65,16 @@ export async function activate(
 
   // Register commands
   context.subscriptions.push(
-    treeView,
-    statusBar,
-
     vscode.commands.registerCommand(COMMANDS.CREATE, () =>
-      createWorktree(mainWorktreePath, treeProvider, colorManager),
+      createWorktree(mainPath, treeProvider, colorManager),
     ),
 
     vscode.commands.registerCommand(COMMANDS.REMOVE, (item?) =>
-      removeWorktree(mainWorktreePath, treeProvider, colorManager, item),
+      removeWorktree(mainPath, treeProvider, colorManager, item),
     ),
 
     vscode.commands.registerCommand(COMMANDS.SWITCH, () =>
-      switchWorktree(mainWorktreePath),
+      switchWorktree(mainPath),
     ),
 
     vscode.commands.registerCommand(COMMANDS.OPEN, (item?) =>
@@ -73,12 +87,12 @@ export async function activate(
     }),
 
     vscode.commands.registerCommand(COMMANDS.SET_COLOR, (item?) =>
-      setWorktreeColor(mainWorktreePath, colorManager, treeProvider, item),
+      setWorktreeColor(mainPath, colorManager, treeProvider, item),
     ),
   );
 
   // File watcher — refresh tree and status bar on worktree changes
-  const fileWatcher = new FileWatcher(mainWorktreePath, () => {
+  const fileWatcher = new FileWatcher(mainPath, () => {
     treeProvider.refresh();
     refreshStatusBar();
   });

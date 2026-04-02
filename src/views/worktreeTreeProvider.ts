@@ -11,7 +11,7 @@ export class WorktreeTreeProvider
 
   private refreshInFlight = false;
 
-  constructor(private mainWorktreePath: string) {}
+  constructor(private mainWorktreePath: string | undefined) {}
 
   refresh(): void {
     if (this.refreshInFlight) return;
@@ -30,7 +30,7 @@ export class WorktreeTreeProvider
   async getChildren(
     element?: WorktreeTreeItem,
   ): Promise<WorktreeTreeItem[]> {
-    if (element) return [];
+    if (element || !this.mainWorktreePath) return [];
 
     try {
       const worktrees = await listWorktrees(this.mainWorktreePath);
