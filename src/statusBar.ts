@@ -19,7 +19,7 @@ export class StatusBar implements vscode.Disposable {
     const branchName = current?.branchShort ?? "unknown";
     const count = worktrees.length;
 
-    this.item.text = `$(git-branch) ${branchName} $(list-tree) ${count}`;
+    this.item.text = `$(type-hierarchy) ${branchName} (${count})`;
     this.item.tooltip = `Worktree: ${branchName} (${count} total)\nClick to switch`;
   }
 

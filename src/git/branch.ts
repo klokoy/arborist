@@ -34,10 +34,16 @@ export async function isBranchMerged(
   cwd: string,
   branch: string,
 ): Promise<boolean> {
-  const output = await gitExec(["branch", "--merged"], cwd);
-  const merged = output
-    .trim()
-    .split("\n")
-    .map((b) => b.trim().replace(/^\*\s*/, ""));
-  return merged.includes(branch);
+  // Check if branch is merged into HEAD of the main worktree
+  // Use rev-list to see if there are commits on branch not yet in HEAD
+  try {
+    const output = await gitExec(
+      ["rev-list", "--count", `HEAD..${branch}`],
+      cwd,
+    );
+    return parseInt(output.trim(), 10) === 0;
+  } catch {
+    // If the check fails, assume not merged to be safe
+    return false;
+  }
 }

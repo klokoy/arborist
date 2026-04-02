@@ -20,13 +20,14 @@ export async function activate(
   if (workspaceRoot) {
     try {
       mainWorktreePath = await getMainWorktreePath(workspaceRoot);
-    } catch {
-      // Not a git repo or git not available
+    } catch (err) {
+      console.error("Arborist: failed to find git worktree:", err);
     }
   }
+  console.log("Arborist: workspaceRoot =", workspaceRoot, "mainWorktreePath =", mainWorktreePath);
 
   const colorManager = new ColorManager(context.globalState);
-  const treeProvider = new WorktreeTreeProvider(mainWorktreePath);
+  const treeProvider = new WorktreeTreeProvider(mainWorktreePath, colorManager);
   const statusBar = new StatusBar();
 
   const treeView = vscode.window.createTreeView(VIEWS.WORKTREE_EXPLORER, {
@@ -97,6 +98,12 @@ export async function activate(
     refreshStatusBar();
   });
   context.subscriptions.push({ dispose: () => fileWatcher.dispose() });
+
+  // Ensure the main worktree has a color assigned (green by default)
+  if (!colorManager.getColor(mainPath)) {
+    const color = await colorManager.assignColor(mainPath, true);
+    await colorManager.applyColorToWorktree(mainPath, color);
+  }
 
   // Apply color for the current worktree on activation
   await colorManager.applyCurrentWorktreeColor();

@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import { WorktreeTreeItem } from "./worktreeTreeItem";
 import { listWorktrees } from "../git/worktree";
+import { ColorManager } from "../color/colorManager";
 
 export class WorktreeTreeProvider
   implements vscode.TreeDataProvider<WorktreeTreeItem>
@@ -11,7 +12,10 @@ export class WorktreeTreeProvider
 
   private refreshInFlight = false;
 
-  constructor(private mainWorktreePath: string | undefined) {}
+  constructor(
+    private mainWorktreePath: string | undefined,
+    private colorManager?: ColorManager,
+  ) {}
 
   refresh(): void {
     if (this.refreshInFlight) return;
@@ -34,7 +38,10 @@ export class WorktreeTreeProvider
 
     try {
       const worktrees = await listWorktrees(this.mainWorktreePath);
-      return worktrees.map((wt) => new WorktreeTreeItem(wt));
+      return worktrees.map((wt) => {
+        const color = this.colorManager?.getColor(wt.path);
+        return new WorktreeTreeItem(wt, color);
+      });
     } catch {
       return [];
     }

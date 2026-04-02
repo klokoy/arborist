@@ -1,6 +1,14 @@
 import * as vscode from "vscode";
 import * as path from "path";
 import * as fs from "fs";
+
+function realPath(p: string): string {
+  try {
+    return fs.realpathSync(p);
+  } catch {
+    return path.resolve(p);
+  }
+}
 import { GLOBAL_STATE_KEYS } from "../constants";
 import { getConfig } from "../config";
 import { getForegroundColor, getInactiveBackground, getNextColor } from "./palette";
@@ -35,26 +43,26 @@ export class ColorManager {
     const assignments = this.getAssignments();
 
     if (color) {
-      assignments[worktreePath] = color;
+      assignments[realPath(worktreePath)] = color;
     } else if (isMain) {
-      assignments[worktreePath] = config.mainWorktreeColor;
+      assignments[realPath(worktreePath)] = config.mainWorktreeColor;
     } else {
       const usedColors = Object.values(assignments);
-      assignments[worktreePath] = getNextColor(config.colorPalette, usedColors);
+      assignments[realPath(worktreePath)] = getNextColor(config.colorPalette, usedColors);
     }
 
     await this.saveAssignments(assignments);
-    return assignments[worktreePath];
+    return assignments[realPath(worktreePath)];
   }
 
   async removeColor(worktreePath: string): Promise<void> {
     const assignments = this.getAssignments();
-    delete assignments[worktreePath];
+    delete assignments[realPath(worktreePath)];
     await this.saveAssignments(assignments);
   }
 
   getColor(worktreePath: string): string | undefined {
-    return this.getAssignments()[worktreePath];
+    return this.getAssignments()[realPath(worktreePath)];
   }
 
   async applyColorToWorktree(
@@ -80,7 +88,7 @@ export class ColorManager {
 
     // If this is the current workspace, use the VS Code API for instant apply
     const currentPath = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
-    if (currentPath && path.resolve(currentPath) === path.resolve(worktreePath)) {
+    if (currentPath && realPath(currentPath) === realPath(worktreePath)) {
       const config = vscode.workspace.getConfiguration("workbench");
       const existing = config.get<Record<string, string>>("colorCustomizations", {});
       await config.update(
@@ -99,7 +107,7 @@ export class ColorManager {
     const currentPath = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
     if (!currentPath) return;
 
-    const resolved = path.resolve(currentPath);
+    const resolved = realPath(currentPath);
     const color = this.getColor(resolved);
     if (color) {
       await this.applyColorToWorktree(resolved, color);

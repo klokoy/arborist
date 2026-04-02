@@ -99,6 +99,11 @@
         {
           "command": "arborist.removeWorktree",
           "when": "view == arborist.worktreeExplorer && viewItem == worktree",
+          "group": "inline"
+        },
+        {
+          "command": "arborist.removeWorktree",
+          "when": "view == arborist.worktreeExplorer && viewItem == worktree",
           "group": "1_modification"
         },
         {
