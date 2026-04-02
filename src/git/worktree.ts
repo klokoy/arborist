@@ -3,7 +3,7 @@ import * as fs from "fs";
 import * as vscode from "vscode";
 import { WorktreeInfo } from "../types";
 import { gitExec } from "./executor";
-import { isDirty } from "./status";
+import { isDirty, getStatusSummary } from "./status";
 
 function realPath(p: string): string {
   try {
@@ -61,7 +61,10 @@ export async function listWorktrees(cwd: string): Promise<WorktreeInfo[]> {
 
   const worktrees = await Promise.all(
     raw.map(async (entry, index) => {
-      const dirty = await isDirty(entry.path).catch(() => false);
+      const [dirty, status] = await Promise.all([
+        isDirty(entry.path).catch(() => false),
+        getStatusSummary(entry.path).catch(() => ({ modified: 0, untracked: 0, staged: 0 })),
+      ]);
       const resolvedCurrent = currentPath ? realPath(currentPath) : null;
       const resolvedEntry = realPath(entry.path);
 
@@ -73,6 +76,7 @@ export async function listWorktrees(cwd: string): Promise<WorktreeInfo[]> {
         isMain: index === 0,
         isDirty: dirty,
         isCurrent: resolvedCurrent === resolvedEntry,
+        status,
       };
     }),
   );

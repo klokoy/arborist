@@ -31,9 +31,13 @@ export class WorktreeTreeItem extends vscode.TreeItem {
   ) {
     super(worktree.branchShort, vscode.TreeItemCollapsibleState.None);
 
-    const dirtyIndicator = worktree.isDirty ? " \u25cf" : "";
+    const changeParts: string[] = [];
+    if (worktree.status.staged > 0) changeParts.push(`+${worktree.status.staged}`);
+    if (worktree.status.modified > 0) changeParts.push(`~${worktree.status.modified}`);
+    if (worktree.status.untracked > 0) changeParts.push(`?${worktree.status.untracked}`);
+    const changesSummary = changeParts.length > 0 ? ` ${changeParts.join(" ")}` : "";
     const currentIndicator = worktree.isCurrent ? " (current)" : "";
-    this.description = `${dirtyIndicator}${currentIndicator}`;
+    this.description = `${changesSummary}${currentIndicator}`;
 
     const relativePath = path.relative(
       path.dirname(worktree.path),
@@ -44,7 +48,9 @@ export class WorktreeTreeItem extends vscode.TreeItem {
         `**${worktree.branchShort}**`,
         `Path: \`${relativePath}\``,
         `HEAD: \`${worktree.head.substring(0, 8)}\``,
-        worktree.isDirty ? "Status: uncommitted changes" : "Status: clean",
+        worktree.isDirty
+          ? `Status: ${worktree.status.staged} staged, ${worktree.status.modified} modified, ${worktree.status.untracked} untracked`
+          : "Status: clean",
       ].join("\n\n"),
     );
 
