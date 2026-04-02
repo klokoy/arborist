@@ -3,7 +3,12 @@
   "displayName": "Arborist",
   "description": "Git worktree management for VS Code",
   "version": "0.1.0",
-  "publisher": "arborist",
+  "publisher": "klokoy",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/klokoy/arborist"
+  },
   "engines": {
     "vscode": "^1.85.0"
   },
