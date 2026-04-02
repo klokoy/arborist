@@ -30,6 +30,30 @@ export async function deleteBranch(
   await gitExec(["branch", force ? "-D" : "-d", branch], cwd);
 }
 
+export async function getMainBranchName(
+  mainWorktreePath: string,
+): Promise<string> {
+  const output = await gitExec(
+    ["rev-parse", "--abbrev-ref", "HEAD"],
+    mainWorktreePath,
+  );
+  return output.trim();
+}
+
+export async function fetchOrigin(
+  cwd: string,
+  branch: string,
+): Promise<void> {
+  await gitExec(["fetch", "origin", branch], cwd);
+}
+
+export async function rebase(
+  cwd: string,
+  onto: string,
+): Promise<void> {
+  await gitExec(["rebase", onto], cwd);
+}
+
 export async function isBranchMerged(
   cwd: string,
   branch: string,
