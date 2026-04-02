@@ -99,6 +99,17 @@ export async function activate(
   });
   context.subscriptions.push({ dispose: () => fileWatcher.dispose() });
 
+  // Watch workspace file changes to update dirty status in the tree view
+  const refreshOnChange = () => {
+    treeProvider.refresh();
+    refreshStatusBar();
+  };
+  context.subscriptions.push(
+    vscode.workspace.onDidSaveTextDocument(refreshOnChange),
+    vscode.workspace.onDidCreateFiles(refreshOnChange),
+    vscode.workspace.onDidDeleteFiles(refreshOnChange),
+  );
+
   // Ensure the main worktree has a color assigned (green by default)
   if (!colorManager.getColor(mainPath)) {
     const color = await colorManager.assignColor(mainPath, true);

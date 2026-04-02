@@ -1,3 +1,9 @@
+export interface StatusSummary {
+  modified: number;
+  untracked: number;
+  staged: number;
+}
+
 export interface WorktreeInfo {
   path: string;
   head: string;
@@ -6,4 +12,5 @@ export interface WorktreeInfo {
   isMain: boolean;
   isDirty: boolean;
   isCurrent: boolean;
+  status: StatusSummary;
 }
