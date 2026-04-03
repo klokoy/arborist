@@ -43,16 +43,23 @@ export class WorktreeTreeItem extends vscode.TreeItem {
       path.dirname(worktree.path),
       worktree.path,
     );
-    this.tooltip = new vscode.MarkdownString(
-      [
-        `**${worktree.branchShort}**`,
-        `Path: \`${relativePath}\``,
-        `HEAD: \`${worktree.head.substring(0, 8)}\``,
-        worktree.isDirty
-          ? `Status: ${worktree.status.staged} staged, ${worktree.status.modified} modified, ${worktree.status.untracked} untracked`
-          : "Status: clean",
-      ].join("\n\n"),
-    );
+    const tooltipLines = [
+      `**${worktree.branchShort}**`,
+      `Path: \`${relativePath}\``,
+      `HEAD: \`${worktree.head.substring(0, 8)}\``,
+      worktree.isDirty
+        ? `Status: ${worktree.status.staged} staged, ${worktree.status.modified} modified, ${worktree.status.untracked} untracked`
+        : "Status: clean",
+    ];
+
+    if (!worktree.isMain && (worktree.ahead > 0 || worktree.behind > 0)) {
+      const parts: string[] = [];
+      if (worktree.ahead > 0) parts.push(`${worktree.ahead} ahead`);
+      if (worktree.behind > 0) parts.push(`${worktree.behind} behind`);
+      tooltipLines.push(`Commits: ${parts.join(", ")} main`);
+    }
+
+    this.tooltip = new vscode.MarkdownString(tooltipLines.join("\n\n"));
 
     this.contextValue = worktree.isMain
       ? CONTEXT_VALUES.WORKTREE_MAIN

@@ -4,6 +4,7 @@ import * as vscode from "vscode";
 import { WorktreeInfo } from "../types";
 import { gitExec } from "./executor";
 import { isDirty, getStatusSummary } from "./status";
+import { getAheadBehind } from "./branch";
 
 function realPath(p: string): string {
   try {
@@ -61,9 +62,13 @@ export async function listWorktrees(cwd: string): Promise<WorktreeInfo[]> {
 
   const worktrees = await Promise.all(
     raw.map(async (entry, index) => {
-      const [dirty, status] = await Promise.all([
+      const isMain = index === 0;
+      const [dirty, status, aheadBehind] = await Promise.all([
         isDirty(entry.path).catch(() => false),
         getStatusSummary(entry.path).catch(() => ({ modified: 0, untracked: 0, staged: 0 })),
+        !isMain && entry.branch
+          ? getAheadBehind(cwd, branchShortName(entry.branch)).catch(() => ({ ahead: 0, behind: 0 }))
+          : Promise.resolve({ ahead: 0, behind: 0 }),
       ]);
       const resolvedCurrent = currentPath ? realPath(currentPath) : null;
       const resolvedEntry = realPath(entry.path);
@@ -73,10 +78,12 @@ export async function listWorktrees(cwd: string): Promise<WorktreeInfo[]> {
         head: entry.head,
         branch: entry.branch,
         branchShort: branchShortName(entry.branch),
-        isMain: index === 0,
+        isMain,
         isDirty: dirty,
         isCurrent: resolvedCurrent === resolvedEntry,
         status,
+        ahead: aheadBehind.ahead,
+        behind: aheadBehind.behind,
       };
     }),
   );
