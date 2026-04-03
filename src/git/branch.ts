@@ -58,14 +58,22 @@ export async function isBranchMerged(
   cwd: string,
   branch: string,
 ): Promise<boolean> {
-  // Check if branch is merged into HEAD of the main worktree
-  // Use rev-list to see if there are commits on branch not yet in HEAD
   try {
-    const output = await gitExec(
+    // Fast path: commit ancestry (normal merges, fast-forwards)
+    const revListOutput = await gitExec(
       ["rev-list", "--count", `HEAD..${branch}`],
       cwd,
     );
-    return parseInt(output.trim(), 10) === 0;
+    if (parseInt(revListOutput.trim(), 10) === 0) {
+      return true;
+    }
+
+    // Slow path: patch equivalence (squash merges, rebases)
+    // Lines with "-" = equivalent patch exists in HEAD
+    // Lines with "+" = genuinely unmerged
+    const cherryOutput = await gitExec(["cherry", "HEAD", branch], cwd);
+    const lines = cherryOutput.trim().split("\n").filter((l) => l.length > 0);
+    return lines.every((line) => line.startsWith("-"));
   } catch {
     // If the check fails, assume not merged to be safe
     return false;
