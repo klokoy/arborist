@@ -80,12 +80,22 @@
         "command": "arborist.rebaseOnMain",
         "title": "Arborist: Rebase on Main",
         "icon": "$(git-merge)"
+      },
+      {
+        "command": "arborist.updateMain",
+        "title": "Arborist: Update Main",
+        "icon": "$(cloud-download)"
       }
     ],
     "menus": {
       "view/title": [
         {
           "command": "arborist.createWorktree",
+          "when": "view == arborist.worktreeExplorer",
+          "group": "navigation"
+        },
+        {
+          "command": "arborist.updateMain",
           "when": "view == arborist.worktreeExplorer",
           "group": "navigation"
         },

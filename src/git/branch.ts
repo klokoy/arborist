@@ -47,6 +47,10 @@ export async function fetchOrigin(
   await gitExec(["fetch", "origin", branch], cwd);
 }
 
+export async function pull(cwd: string): Promise<void> {
+  await gitExec(["pull"], cwd);
+}
+
 export async function rebase(
   cwd: string,
   onto: string,
