@@ -58,6 +58,37 @@ export async function rebase(
   await gitExec(["rebase", onto], cwd);
 }
 
+export async function getAheadBehind(
+  cwd: string,
+  branch: string,
+): Promise<{ ahead: number; behind: number }> {
+  const output = await gitExec(
+    ["rev-list", "--count", "--left-right", `HEAD...${branch}`],
+    cwd,
+  );
+  const [left, right] = output.trim().split("\t").map(Number);
+
+  let ahead = right;
+  let behind = left;
+
+  // If there are commits "ahead", check with git cherry to filter out
+  // commits whose patches are already in main (e.g. after squash/rebase merge)
+  if (ahead > 0) {
+    const cherryOutput = await gitExec(["cherry", "HEAD", branch], cwd);
+    const lines = cherryOutput.trim().split("\n").filter((l) => l.length > 0);
+    // Only count "+" lines — "-" lines have equivalent patches already in HEAD
+    ahead = lines.filter((line) => line.startsWith("+")).length;
+
+    // If all branch commits are already in main, behind is irrelevant
+    // (the "behind" is just the merge commit containing the same changes)
+    if (ahead === 0) {
+      behind = 0;
+    }
+  }
+
+  return { ahead, behind };
+}
+
 export async function isBranchMerged(
   cwd: string,
   branch: string,

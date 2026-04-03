@@ -13,4 +13,6 @@ export interface WorktreeInfo {
   isDirty: boolean;
   isCurrent: boolean;
   status: StatusSummary;
+  ahead: number;
+  behind: number;
 }
