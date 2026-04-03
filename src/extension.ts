@@ -11,6 +11,7 @@ import { switchWorktree } from "./commands/switchWorktree";
 import { openWorktree } from "./commands/openWorktree";
 import { setWorktreeColor } from "./commands/setWorktreeColor";
 import { rebaseOnMain } from "./commands/rebaseOnMain";
+import { updateMain } from "./commands/updateMain";
 
 export async function activate(
   context: vscode.ExtensionContext,
@@ -48,6 +49,7 @@ export async function activate(
       vscode.commands.registerCommand(COMMANDS.REFRESH, () => {}),
       vscode.commands.registerCommand(COMMANDS.SET_COLOR, () => {}),
       vscode.commands.registerCommand(COMMANDS.REBASE_ON_MAIN, () => {}),
+      vscode.commands.registerCommand(COMMANDS.UPDATE_MAIN, () => {}),
     );
     return;
   }
@@ -95,6 +97,10 @@ export async function activate(
 
     vscode.commands.registerCommand(COMMANDS.REBASE_ON_MAIN, (item?) =>
       rebaseOnMain(mainPath, treeProvider, item),
+    ),
+
+    vscode.commands.registerCommand(COMMANDS.UPDATE_MAIN, () =>
+      updateMain(mainPath, treeProvider),
     ),
   );
 
