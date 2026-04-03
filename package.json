@@ -2,7 +2,7 @@
   "name": "arborist",
   "displayName": "Arborist",
   "description": "Git worktree management for VS Code",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "publisher": "klokoy",
   "license": "MIT",
   "repository": {
