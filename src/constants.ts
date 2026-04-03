@@ -7,6 +7,7 @@ export const COMMANDS = {
   SET_COLOR: "arborist.setWorktreeColor",
   REBASE_ON_MAIN: "arborist.rebaseOnMain",
   UPDATE_MAIN: "arborist.updateMain",
+  MOVE_TO_NEW_WORKTREE: "arborist.moveToNewWorktree",
 } as const;
 
 export const VIEWS = {

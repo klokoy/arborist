@@ -85,6 +85,11 @@
         "command": "arborist.updateMain",
         "title": "Arborist: Update Main",
         "icon": "$(cloud-download)"
+      },
+      {
+        "command": "arborist.moveToNewWorktree",
+        "title": "Arborist: Move Changes to New Worktree",
+        "icon": "$(git-stash-pop)"
       }
     ],
     "menus": {
@@ -139,6 +144,11 @@
         {
           "command": "arborist.rebaseOnMain",
           "when": "view == arborist.worktreeExplorer && viewItem == worktree",
+          "group": "1_modification"
+        },
+        {
+          "command": "arborist.moveToNewWorktree",
+          "when": "view == arborist.worktreeExplorer && viewItem == worktreeMain",
           "group": "1_modification"
         }
       ],
